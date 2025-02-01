@@ -22,6 +22,8 @@ export default async function handler(
     if (!user.matchedUser) {
       return res.status(404).json({ error: "User not found." });
     }
+    if (user.matchedUser) {
+    }
 
     // Get contest data using GraphQL
     const contestData = await leetcode.graphql({
@@ -53,10 +55,9 @@ export default async function handler(
       `,
       variables: { username },
     });
-
-    // Format the contest history data
+    const strength = 100 - contestData.data.userContestRanking.topPercentage;
     const contestHistory = contestData.data.userContestRankingHistory
-      .filter((contest: { attended: boolean }) => contest.attended) // Filter attended contests
+      .filter((contest: { attended: boolean }) => contest.attended)
       .map((contest: { contest: { title: string }; rating: number }) => ({
         title: contest.contest.title,
         rating: contest.rating,
@@ -68,13 +69,13 @@ export default async function handler(
       avatar: user.matchedUser.profile.userAvatar,
       username: user.matchedUser.profile.realName,
       profile: user.matchedUser.profile,
+      strength: strength,
       mana: user.matchedUser.contributions.points,
       totalSolved: submissions.find((q) => q.difficulty === "All")?.count || 0,
       easySolved: submissions.find((q) => q.difficulty === "Easy")?.count || 0,
       mediumSolved:
         submissions.find((q) => q.difficulty === "Medium")?.count || 0,
       hardSolved: submissions.find((q) => q.difficulty === "Hard")?.count || 0,
-      // Contest data
       contestRanking: {
         attendedContests:
           contestData.data.userContestRanking?.attendedContestsCount || 0,

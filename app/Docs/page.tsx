@@ -1,8 +1,9 @@
 "use client";
+import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Book, FileText, Compass, Sword, Shield } from "lucide-react";
 
-export function Docs() {
+export default function Docs() {
   const sections = [
     {
       icon: <FileText className="w-6 h-6" />,
@@ -102,6 +103,7 @@ export function Docs() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

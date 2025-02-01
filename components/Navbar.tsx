@@ -17,7 +17,7 @@ export function Navbar() {
       label: "Dashboard",
     },
     { path: "/profile", icon: <User className="w-5 h-5" />, label: "Profile" },
-    { path: "/docs", icon: <Book className="w-5 h-5" />, label: "Docs" },
+    { path: "/Docs", icon: <Book className="w-5 h-5" />, label: "Docs" },
   ];
 
   return (

@@ -24,6 +24,8 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { useState } from "react";
 import photo from "@/app/assest/gratisography-augmented-reality-800x525.jpg";
+import { Footer } from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
 
 interface Skill {
   name: string;
@@ -39,16 +41,8 @@ const githubData = [
   { date: "2024-06", contributions: 300 },
 ];
 
-// const leetcodeData = [
-//   { date: "2024-01", problems: 50 },
-//   { date: "2024-02", problems: 75 },
-//   { date: "2024-03", problems: 100 },
-//   { date: "2024-04", problems: 130 },
-//   { date: "2024-05", problems: 160 },
-//   { date: "2024-06", problems: 200 },
-// ];
-
 export default function Dashboard() {
+  const { toast } = useToast();
   const [skills] = React.useState<Skill[]>([
     {
       name: "Dominator's Touch",
@@ -75,6 +69,7 @@ export default function Dashboard() {
     username: "Sung Jin-Woo",
     avatar: photo,
     mana: 2800,
+    strength: 95,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,12 +96,18 @@ export default function Dashboard() {
           username: data.username,
           avatar: data.avatar || profileData.avatar,
           mana: data.mana || profileData.mana,
+          strength: data.strength || profileData.strength,
         });
         setContestHistory(data.contestHistory);
         console.log(data);
         setMessage(`Profile updated for ${data.username}`);
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        });
       } else {
         setMessage(`Error: ${data.error}`);
+        toast({ title: "Error", description: "user not found" });
       }
     } catch (error) {
       setMessage("Something went wrong.");
@@ -187,7 +188,7 @@ export default function Dashboard() {
               {[
                 {
                   name: "Strength",
-                  value: 95,
+                  value: profileData.strength,
                   icon: <Sword className="w-5 h-5" />,
                 },
                 {
@@ -362,6 +363,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }
