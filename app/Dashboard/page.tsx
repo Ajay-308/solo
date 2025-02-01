@@ -9,7 +9,7 @@ import {
   Trophy,
   Github,
   ChevronRight,
-  Code2,
+  Loader2,
 } from "lucide-react";
 import {
   LineChart,
@@ -22,12 +22,8 @@ import {
 } from "recharts";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
-
-interface Stat {
-  name: string;
-  value: number;
-  icon: React.ReactNode;
-}
+import { useState } from "react";
+import photo from "@/app/assest/gratisography-augmented-reality-800x525.jpg";
 
 interface Skill {
   name: string;
@@ -43,25 +39,16 @@ const githubData = [
   { date: "2024-06", contributions: 300 },
 ];
 
-const leetcodeData = [
-  { date: "2024-01", problems: 50 },
-  { date: "2024-02", problems: 75 },
-  { date: "2024-03", problems: 100 },
-  { date: "2024-04", problems: 130 },
-  { date: "2024-05", problems: 160 },
-  { date: "2024-06", problems: 200 },
-];
+// const leetcodeData = [
+//   { date: "2024-01", problems: 50 },
+//   { date: "2024-02", problems: 75 },
+//   { date: "2024-03", problems: 100 },
+//   { date: "2024-04", problems: 130 },
+//   { date: "2024-05", problems: 160 },
+//   { date: "2024-06", problems: 200 },
+// ];
 
 export default function Dashboard() {
-  const [stats] = React.useState<Stat[]>([
-    { name: "Strength", value: 95, icon: <Sword className="w-5 h-5" /> },
-    { name: "Defense", value: 85, icon: <Shield className="w-5 h-5" /> },
-    { name: "HP", value: 2500, icon: <Heart className="w-5 h-5" /> },
-    { name: "Mana", value: 1800, icon: <Zap className="w-5 h-5" /> },
-    { name: "Intelligence", value: 75, icon: <Brain className="w-5 h-5" /> },
-    { name: "Level", value: 99, icon: <Trophy className="w-5 h-5" /> },
-  ]);
-
   const [skills] = React.useState<Skill[]>([
     {
       name: "Dominator's Touch",
@@ -80,12 +67,79 @@ export default function Dashboard() {
     },
     { name: "Stealth", level: 2, description: "Become one with shadows" },
   ]);
+  const [leetcodeUsername, setLeetcodeUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [contestHistory, setContestHistory] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState({
+    username: "Sung Jin-Woo",
+    avatar: photo,
+    mana: 2800,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leetcodeUsername) {
+      setMessage("Please enter a username.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: leetcodeUsername }),
+      });
+
+      const data = await response.json();
+      console.log(data.profile?.avatar);
+      if (response.ok) {
+        setProfileData({
+          username: data.username,
+          avatar: data.avatar || profileData.avatar,
+          mana: data.mana || profileData.mana,
+        });
+        setContestHistory(data.contestHistory);
+        console.log(data);
+        setMessage(`Profile updated for ${data.username}`);
+      } else {
+        setMessage(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setMessage("Something went wrong.");
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <Navbar />
 
       <div className="min-h-screen pt-16 p-6 bg-[#0a0b0e]">
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-4 mb-6 bg-black/40 p-4 rounded-lg border border-[#4a9eff]/20"
+        >
+          <input
+            type="text"
+            value={leetcodeUsername}
+            onChange={(e) => setLeetcodeUsername(e.target.value)}
+            placeholder="Enter LeetCode Username"
+            className="w-full px-4 py-2 text-white bg-transparent border border-[#4a9eff]/40 rounded-lg focus:outline-none focus:border-[#4a9eff]"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-[#4a9eff] text-black font-bold rounded-lg flex items-center"
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Submit"}
+          </button>
+        </form>
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             {/* System Interface Header */}
@@ -105,10 +159,10 @@ export default function Dashboard() {
               <div className="relative flex gap-6">
                 <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-[#4a9eff]/20 to-[#4a9eff]/5 border border-[#4a9eff]/30 flex items-center justify-center overflow-hidden">
                   <Image
-                    src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&q=80&w=300&h=300"
+                    src={profileData.avatar}
                     alt="Character"
-                    width={300} // Set width explicitly
-                    height={300} // Set height explicitly
+                    width={128}
+                    height={128}
                     className="opacity-80 rounded-lg"
                   />
                 </div>
@@ -120,7 +174,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-2 font-mono">
-                    Sung Jin-Woo
+                    {profileData.username}
                   </h2>
                   <p className="text-[#4a9eff]">Shadow Monarch</p>
                   <div className="mt-2 inline-block px-2 py-1 bg-[#4a9eff]/10 border border-[#4a9eff]/30 rounded text-sm font-mono">
@@ -129,10 +183,39 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-              {stats.map((stat) => (
+              {[
+                {
+                  name: "Strength",
+                  value: 95,
+                  icon: <Sword className="w-5 h-5" />,
+                },
+                {
+                  name: "Defense",
+                  value: 85,
+                  icon: <Shield className="w-5 h-5" />,
+                },
+                {
+                  name: "HP",
+                  value: 2500,
+                  icon: <Heart className="w-5 h-5" />,
+                },
+                {
+                  name: "Mana",
+                  value: profileData.mana,
+                  icon: <Zap className="w-5 h-5" />,
+                },
+                {
+                  name: "Intelligence",
+                  value: 75,
+                  icon: <Brain className="w-5 h-5" />,
+                },
+                {
+                  name: "Level",
+                  value: 99,
+                  icon: <Trophy className="w-5 h-5" />,
+                },
+              ].map((stat) => (
                 <div
                   key={stat.name}
                   className="bg-black/40 p-4 rounded-lg border border-[#4a9eff]/20 relative overflow-hidden
@@ -153,10 +236,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-
-            {/* GitHub and LeetCode Graphs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* GitHub Contributions */}
               <div className="bg-black/40 p-6 rounded-lg border border-[#4a9eff]/20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#4a9eff]/5 to-transparent"></div>
                 <div className="relative">
@@ -195,44 +275,50 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* LeetCode Progress */}
-              <div className="bg-black/40 p-6 rounded-lg border border-[#4a9eff]/20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#4a9eff]/5 to-transparent"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Code2 className="w-5 h-5 text-[#4a9eff]" />
-                    <h3 className="text-lg font-bold text-white font-mono">
-                      LeetCode Progress
+              {/* LeetCode Kand */}
+              {contestHistory.length > 0 && (
+                <div className="bg-black/40 p-6 rounded-lg border border-[#4a9eff]/20 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#4a9eff]/5 to-transparent"></div>
+                  <div className="relative">
+                    <h3 className="text-lg font-bold text-white mb-4">
+                      LeetCode Contest Rating
                     </h3>
-                  </div>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={leetcodeData}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="#4a9eff20"
-                        />
-                        <XAxis dataKey="date" stroke="#4a9eff80" />
-                        <YAxis stroke="#4a9eff80" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#0a0b0e",
-                            border: "1px solid rgba(74, 158, 255, 0.2)",
-                            borderRadius: "4px",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="problems"
-                          stroke="#4a9eff"
-                          strokeWidth={2}
-                          dot={{ fill: "#4a9eff" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={contestHistory}>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#4a9eff20"
+                          />
+                          <XAxis dataKey="title" stroke="#4a9eff80" />
+                          <YAxis
+                            stroke="#4a9eff80"
+                            domain={[800, 2200]}
+                            ticks={Array.from(
+                              { length: 15 },
+                              (_, i) => 800 + i * 100
+                            )}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#0a0b0e",
+                              border: "1px solid rgba(74, 158, 255, 0.2)",
+                              borderRadius: "4px",
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="rating"
+                            stroke="#4a9eff"
+                            strokeWidth={2}
+                            dot={{ fill: "#4a9eff" }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Skills List */}

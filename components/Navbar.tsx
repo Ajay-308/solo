@@ -12,7 +12,7 @@ export function Navbar() {
   const links = [
     { path: "/", icon: <Home className="w-5 h-5" />, label: "Home" },
     {
-      path: "/dashboard",
+      path: "/Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
       label: "Dashboard",
     },
