@@ -1,31 +1,29 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { LeetCode } from "leetcode-query";
+import { cookies } from "next/headers";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed. Use POST." });
-  }
-
+export async function POST(req: Request) {
   try {
-    const { username } = req.body;
+    const { username } = await req.json();
 
     if (!username) {
-      return res.status(400).json({ error: "Username is required." });
+      return NextResponse.json(
+        { error: "Username is required." },
+        { status: 400 }
+      );
     }
 
+    console.log(`${username} exists`);
     const leetcode = new LeetCode();
     const user = await leetcode.user(username);
 
     if (!user.matchedUser) {
-      return res.status(404).json({ error: "User not found." });
+      return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
-    if (user.matchedUser) {
-    }
+    const cookieStore = await cookies();
+    const session = cookieStore.get("session");
+    console.log(session);
 
-    // Get contest data using GraphQL
     const contestData = await leetcode.graphql({
       query: `
         query userContestRankingInfo($username: String!) {
@@ -55,6 +53,7 @@ export default async function handler(
       `,
       variables: { username },
     });
+
     const strength = 100 - contestData.data.userContestRanking.topPercentage;
     const contestHistory = contestData.data.userContestRankingHistory
       .filter((contest: { attended: boolean }) => contest.attended)
@@ -62,10 +61,11 @@ export default async function handler(
         title: contest.contest.title,
         rating: contest.rating,
       }));
+
     console.log(contestHistory);
     const submissions = user.matchedUser.submitStats.acSubmissionNum || [];
 
-    return res.status(200).json({
+    return NextResponse.json({
       avatar: user.matchedUser.profile.userAvatar,
       username: user.matchedUser.profile.realName,
       profile: user.matchedUser.profile,
@@ -88,6 +88,18 @@ export default async function handler(
     });
   } catch (error) {
     console.error("LeetCode API Error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
+}
+
+export async function GET() {
+  const cookieStore = cookies();
+  const session = (await cookieStore).get("session");
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return NextResponse.json({ username: session.value }, { status: 200 });
 }

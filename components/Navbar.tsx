@@ -1,55 +1,49 @@
 "use client";
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Sword, LayoutDashboard, User, Book, Home } from "lucide-react";
+import React, { useState } from "react";
+import { Menu, X, Shield } from "lucide-react";
 
-export function Navbar() {
-  const pathname = usePathname(); // ✅ Correct way to get current route in Next.js
-
-  const isActive = (path: string) => pathname === path;
-
-  const links = [
-    { path: "/", icon: <Home className="w-5 h-5" />, label: "Home" },
-    {
-      path: "/Dashboard",
-      icon: <LayoutDashboard className="w-5 h-5" />,
-      label: "Dashboard",
-    },
-    { path: "/profile", icon: <User className="w-5 h-5" />, label: "Profile" },
-    { path: "/Docs", icon: <Book className="w-5 h-5" />, label: "Docs" },
-  ];
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-950/40 border-b border-blue-500/30 backdrop-blur-sm fixed w-full z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
-            <Sword className="w-8 h-8 text-blue-400" />
-            <span className="text-xl font-bold text-blue-300">Solo System</span>
-          </Link>
+    <div className=" bg-gray-950 text-gray-100">
+      <nav className="fixed w-full bg-gray-900/80 backdrop-blur-sm border-b border-purple-900/50 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-2">
+              <Shield size={28} className="text-blue-500" />
+              <span className="text-xl font-bold">Solo System</span>
+            </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex space-x-8">
-            {links.map((link) => (
-              <Link
-                key={link.path}
-                href={link.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                  ${
-                    isActive(link.path)
-                      ? "text-blue-300 bg-blue-500/20"
-                      : "text-blue-400/70 hover:text-blue-300 hover:bg-blue-500/10"
-                  }`}
+            <div className="hidden md:flex items-center space-x-8">
+              <button className="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg transition duration-200">
+                Enter Gate
+              </button>
+            </div>
+
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-gray-300 hover:text-blue-500 transition duration-200"
               >
-                {link.icon}
-                <span>{link.label}</span>
-              </Link>
-            ))}
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
+          {/* for mobile */}
+          {isMenuOpen && (
+            <div className="md:hidden py-4 border-t border-purple-900/50">
+              <div className="flex flex-col space-y-4">
+                <button className="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg transition duration-200 w-full">
+                  Enter Gate
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
-}
+};
+
+export default Navbar;
