@@ -89,7 +89,7 @@ export default function LeetCodeSignIn() {
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold shadow-lg"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={fetchProfileData} // API call only happens on ACCEPT
+                onClick={fetchProfileData}
               >
                 ACCEPT
               </motion.button>
