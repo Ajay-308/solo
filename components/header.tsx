@@ -1,111 +1,110 @@
 "use client";
 
-import Link from "next/link";
-import { User, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import React, { useState } from "react";
+import { Sword, LayoutDashboard, FileText, User, Menu, X } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-export function Header() {
-  const [user, setUser] = useState<{
-    username: string;
-    avatar?: string;
-  } | null>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/profile", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          console.log("User Data:", data);
-          setAvatar(data.avatar || null); // Handle undefined avatar
-          setUser(data);
-        }
-      } catch (error) {
-        console.log("Error fetching user data:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    setUser(null);
-    setAvatar(null);
-    router.push("/");
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <nav className="flex items-center justify-between p-4 bg-white shadow-sm">
-      <div className="flex items-center space-x-2">
-        <Shield size={28} className="text-blue-500" />
-        <span className="text-xl font-bold">Solo System</span>
-      </div>
+    <div className="min-h-screen bg-[#0B1121]">
+      <nav className="fixed top-0 z-50 w-full border-b border-blue-500/20 bg-[#0B1121]/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-2">
+            <Sword size={24} className="text-blue-500" />
+            <span className="text-xl font-bold text-blue-100">Solo System</span>
+          </div>
 
-      <div className="flex space-x-4">
-        <Link
-          href="/dashboard"
-          className="text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          Dashboard
-        </Link>
-        <Link
-          href="/docs"
-          className="text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          Docs
-        </Link>
-      </div>
+          <button
+            className="text-gray-300 focus:outline-none md:hidden"
+            onClick={toggleMenu}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            {avatar ? (
-              <Image
-                src={avatar}
-                alt="User Avatar"
-                width={32}
-                height={32}
-                className="rounded-full"
+          <div className="hidden md:flex items-center gap-6">
+            <NavLink
+              icon={<LayoutDashboard size={20} />}
+              text="Dashboard"
+              href="/dashboard"
+            />
+            <NavLink icon={<User size={20} />} text="Profile" href="/profile" />
+            <NavLink icon={<FileText size={20} />} text="Docs" href="/docs" />
+            <UserButton />
+          </div>
+        </div>
+        {isMenuOpen && (
+          <div className="bg-[#0B1121]/95 py-4 md:hidden">
+            <div className="mx-auto max-w-7xl flex flex-col gap-4 px-6">
+              <MobileNavLink
+                icon={<LayoutDashboard size={20} />}
+                text="Dashboard"
+                href="/dashboard"
               />
-            ) : (
-              <User className="h-5 w-5" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          {user ? (
-            <>
-              <DropdownMenuItem className="font-medium">
-                {user.username}
-              </DropdownMenuItem>
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                Log out
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <DropdownMenuItem>
-              <Link href="/sign-in">Sign In</Link>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </nav>
+              <MobileNavLink
+                icon={<User size={20} />}
+                text="Profile"
+                href="/profile"
+              />
+              <MobileNavLink
+                icon={<FileText size={20} />}
+                text="Docs"
+                href="/docs"
+              />
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Page content */}
+      <div className="pt-16 px-6">
+        <h1 className="text-2xl font-bold text-white">
+          Welcome to Solo System
+        </h1>
+      </div>
+    </div>
   );
 }
+
+const NavLink = ({
+  icon,
+  text,
+  href,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  href: string;
+}) => (
+  <a
+    href={href}
+    className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-blue-400 transition-colors rounded-md hover:bg-blue-500/10"
+  >
+    {icon}
+    <span>{text}</span>
+  </a>
+);
+
+const MobileNavLink = ({
+  icon,
+  text,
+  href,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  href: string;
+}) => (
+  <a
+    href={href}
+    className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-blue-400 transition-colors rounded-md hover:bg-blue-500/10"
+  >
+    {icon}
+    <span className="text-sm">{text}</span>
+  </a>
+);
+
+export default Header;
