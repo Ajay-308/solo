@@ -3,9 +3,34 @@
 import React, { useState } from "react";
 import { Sword, LayoutDashboard, FileText, User, Menu, X } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import toast from "react-hot-toast";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [username, setUsername] = useState("");
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log("Username saved:", data);
+        toast.success("Username saved successfully!");
+      } else {
+        toast.error("username not found");
+      }
+    } catch (error) {
+      console.error("Failed to save username:", error);
+      toast.error("Failed to save username :(");
+    }
+    setUsername("");
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -60,11 +85,16 @@ function Header() {
           </div>
         )}
       </nav>
-
-      {/* Page content */}
       <div className="pt-16 px-6">
         <h1 className="text-2xl font-bold text-white">
-          Welcome to Solo System
+          <Input
+            placeholder="LeetCode username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <Button onClick={handleSubmit} className="hover:bg-blue-500">
+            submit
+          </Button>
         </h1>
       </div>
     </div>

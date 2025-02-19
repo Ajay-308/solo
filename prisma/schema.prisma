@@ -13,24 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model LeetCodeStats {
-  id     String  @id @default(uuid())
-  userId String? @unique
-  username        String   @unique
-  realName        String?
-  avatar          String?
-  strength        Int
-  mana            Int
-  totalSolved     Int
-  easySolved      Int
-  mediumSolved    Int
-  hardSolved      Int
+model leetCodeStats {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  avatar         String
+  username       String
+  profile        Json     
+  strength       Float
+  mana           Int
+  totalSolved    Int
+  easySolved     Int
+  mediumSolved   Int
+  hardSolved     Int
   attendedContests Int
-  rating          Float
-  globalRanking   Int
-  topPercentage   Float
-  badge           String?
-  contestHistory  Json
-  createdAt       DateTime @default(now())
+  rating         Float
+  globalRanking  Int
+  topPercentage  Float
+  badge          String?
+  contestHistory Json      
+  createdAt      DateTime  @default(now())
 }
-
