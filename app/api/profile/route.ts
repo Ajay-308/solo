@@ -5,15 +5,12 @@ import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    // Get Clerk User
     const clerkUser = await currentUser();
     const userId = clerkUser?.id;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Get username from request body
     const { username } = await req.json();
     if (!username) {
       return NextResponse.json(
@@ -21,13 +18,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    console.log(`${username} exists`);
-
-    // Fetch data from LeetCode API
+    console.log(`fetching leetcode user ${username}`);
     const leetcode = new LeetCode();
     const leetcodeUser = await leetcode.user(username);
-
+    console.log(`${leetcodeUser} exiist`);
     if (!leetcodeUser.matchedUser) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
@@ -52,7 +46,6 @@ export async function POST(req: Request) {
       variables: { username },
     });
 
-    // Extract relevant data
     const strength =
       100 - (contestData.data.userContestRanking?.topPercentage || 100);
     const contestHistory = (contestData.data.userContestRankingHistory || [])
